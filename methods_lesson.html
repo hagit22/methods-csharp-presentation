@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>פעולות במחשבה - Methods in Programming</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #1e3a8a;
+            --secondary-blue: #0ea5e9;
+            --orange-accent: #f97316;
+            --orange-dark: #ea580c;
+            --purple: #6366f1;
+            --green: #10b981;
+            --text-dark: #374151;
+            --bg-light: #f8fafc;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: rtl;
+            background: #f0f0f0;
+            line-height: 1.6;
+            font-size: 1.2rem;
+        }
+
+        .presentation-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+        }
+
+        .slide {
+            padding: 40px 60px 60px 60px;
+            min-height: calc(100vh - 120px);
+            display: none;
+            position: relative;
+        }
+
+        .slide.active {
+            display: block !important;
+        }
+
+        .slide:not(.title-slide)::before {
+            content: "h";
+            position: absolute;
+            top: 5px;
+            left: 35px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 300;
+            font-size: 5rem;
+            opacity: 0.2;
+            color: var(--primary-blue);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .slide:not(.title-slide)::after {
+            content: "y";
+            position: absolute;
+            top: 5px;
+            left: 52px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 300;
+            font-size: 5rem;
+            opacity: 0.2;
+            color: var(--orange-accent);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .title-slide {
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 50%, var(--orange-accent) 100%);
+            color: white;
+            display: none;
+        }
+
+        .title-slide.active {
+            display: flex !important;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title-slide h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .content-slide h2 {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+            margin: 0 0 20px 0;
+            border-bottom: 4px solid var(--orange-accent);
+            padding-bottom: 15px;
+        }
+
+        .content-slide h3 {
+            font-size: 1.8rem;
+            color: var(--secondary-blue);
+            margin: 20px 0 15px 0;
+        }
+
+        .code-display {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            direction: ltr;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .code-keyword {
+            color: #c792ea;
+            font-weight: bold;
+        }
+
+        .code-string {
+            color: #c3e88d;
+        }
+
+        .code-comment {
+            color: #82aaff;
+            font-style: italic;
+        }
+
+        .code-method {
+            color: #ffcb6b;
+        }
+
+        .learning-point {
+            background: linear-gradient(135deg, var(--bg-light), #e0f2fe);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border-right: 5px solid var(--secondary-blue);
+        }
+
+        .learning-point h4 {
+            color: var(--primary-blue);
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        .important-note {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-right: 5px solid #f59e0b;
+        }
+
+        .important-note strong {
+            color: #92400e;
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-number {
+            position: fixed;
+            bottom: 20px;
+            right: 45px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 6px 12px;
+            border-radius: 15px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        .copyright {
+            position: fixed;
+            bottom: 25px;
+            left: 20px;
+            font-size: 0.7rem;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 6px 12px;
+            border-radius: 15px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px 15px 80px 15px;
+            }
+
+            .title-slide h1 {
+                font-size: 2.5rem;
+            }
+
+            .content-slide h2 {
+                font-size: 2rem;
+            }
+
+            .slide:not(.title-slide)::before,
+            .slide:not(.title-slide)::after {
+                font-size: 3rem;
+            }
+
+            .slide-number {
+                visibility: hidden;
+            }
+
+            .copyright {
+                display: none !important;
+            }
+
+            .code-display {
+                font-size: 0.9rem;
+                padding: 15px;
+            }
+        }
+
+        @media print {
+            .nav-buttons, button, .slide-number, .copyright {
+                display: none !important;
+            }
+
+            .slide {
+                display: block !important;
+                page-break-after: always;
+                page-break-inside: avoid;
+                min-height: 90vh;
+                padding: 30px;
+                position: relative;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .presentation-container {
+                box-shadow: none !important;
+                max-width: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide active title-slide">
+            <h1>יסודות מדעי המחשב - שפת #C</h1>
+            <div class="subtitle">פעולות (Methods)</div>
+            <div style="font-size: 1.6rem; margin-top: 20px; opacity: 0.7; color: #e0f2fe;">
+                חגית ידוב
+            </div>
+        </div>
+
+        <!-- Slide 2: Instructions for Hanukkah Project -->
+        <div class="slide content-slide">
+            <h2>שלב 1: מפרויקט חנוכה --> ללולאות מקוננות</h2>
+            
+            <h3>הוראות:</h3>
+            <div class="learning-point">
+                <h4>📝 פתחו פרויקט חדש והעתיקו את הקוד שלכם</h4>
+                <p>1. צרו פרויקט חדש ב-Visual Studio</p>
+                <p>2. העתיקו את הקוד מפרויקט חנוכה (סימולצית הדלקת נרות - עם לולאות For)</p>
+            </div>
+
+            <div class="important-note">
+                <strong>⭐ האתגר:</strong>
+                <p>במקום לבקש מהמשתמש להזין איזה נר זה, כתבו לולאה שרצה 8 פעמים ומדליקה את הנרות בכל ערב!</p>
+                <p><strong>רמז:</strong> תצטרכו לולאה חיצונית שרצה מ-1 עד 8</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: Transition to Methods -->
+        <div class="slide content-slide">
+            <h2>עכשיו - שמרו את הפרויקט בצד</h2>
+            
+            <div class="learning-point">
+                <h4>💡 נחזור לפרויקט הזה בסוף השיעור</h4>
+                <p>אנחנו הולכים ללמוד משהו חדש שיעזור לנו לשפר את הקוד!</p>
+            </div>
+
+            <div class="important-note">
+                <strong>הנושא החדש: פעולות (Methods)</strong>
+                <p>פעולות עוזרות לנו לארגן את הקוד בצורה יותר טובה ולהפוך אותו לקריא יותר.</p>
+            </div>
+
+            <h3>הכינו את עצמכם!</h3>
+            <p>בשקופיות הבאות נלמד איך לכתוב פעולות דרך דוגמה של בית ספר לנהיגה 🚗</p>
+        </div>
+
+        <!-- Slide 4: Method 1 Code - PrintLogo -->
+        <div class="slide content-slide">
+            <h2>פעולה 1: PrintLogo</h2>
+            
+            <h3>📋 העתיקו את הקוד הבא לפרויקט חדש בשם DrivingSchool:</h3>
+            
+            <div class="code-display"><span class="code-keyword">using</span> System;
+
+<span class="code-keyword">class</span> Program
+{
+    <span class="code-keyword">static void</span> <span class="code-method">Main</span>()
+    {
+        <span class="code-method">PrintLogo</span>();
+    }
+
+    <span class="code-comment">// Method that prints the driving school logo</span>
+    <span class="code-keyword">static void</span> <span class="code-method">PrintLogo</span>()
+    {
+        Console.WriteLine(<span class="code-string">"================================"</span>);
+        Console.WriteLine(<span class="code-string">"    DRIVE SAFE Driving School   "</span>);
+        Console.WriteLine(<span class="code-string">"    Your Journey Starts Here!   "</span>);
+        Console.WriteLine(<span class="code-string">"================================"</span>);
+        Console.WriteLine();
+    }
+}</div>
+
+            <div class="important-note">
+                <strong>✅ הריצו את הקוד וראו מה קורה!</strong>
+            </div>
+        </div>
+
+        <!-- Slide 5: Method 1 Learning Points -->
+        <div class="slide content-slide">
+            <h2>מה למדנו מפעולה 1?</h2>
+            
+            <div class="learning-point">
+                <h4>🔹 מבנה בסיסי של פעולה</h4>
+                <p><strong>() static void PrintLogo</strong></p>
+                <p>• <strong>static</strong> - הפעולה שייכת למחלקה (נלמד על זה בהמשך)</p>
+                <p>• <strong>void</strong> - הפעולה לא מחזירה ערך (נדבר על זה עוד מעט) </p>
+                <p>• <strong>PrintLogo</strong> - השם של הפעולה - <strong>מתחיל  באות גדולה</strong></p>
+                <p>• <strong>()</strong> - סוגריים - כאן נכתוב פרמטרים (נדבר על זה עוד מעט)</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>🔹 איך קוראים לפעולה</h4>
+                <p>כדי להשתמש בפעולה, פשוט כותבים את השם שלה עם סוגריים:</p>
+                <p><strong>;()PrintLogo</strong></p>
+            </div>
+
+            <div class="important-note">
+                <strong>💡 למה זה שימושי?</strong>
+                <p>אם נרצה להדפיס את הלוגו במקומות שונים בתוכנית, פשוט נקרא ל- ()PrintLogo במקום לכתוב את כל הקוד מחדש!</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Method 2 Code - GetName -->
+        <div class="slide content-slide">
+            <h2>פעולה 2: GetName</h2>
+            
+            <h3>📋 הוסיפו את הפעולה הזו לקוד שלכם:</h3>
+            
+            <div class="code-display">    <span class="code-comment">// Method that gets name from user and returns it</span>
+    <span class="code-keyword">static string</span> <span class="code-method">GetName</span>()
+    {
+        Console.Write(<span class="code-string">"Please enter your name: "</span>);
+        <span class="code-keyword">string</span> name = Console.ReadLine();
+        <span class="code-keyword">return</span> name;
+    }</div>
+
+            <h3>📋 עדכנו את ה-Main:</h3>
+            
+            <div class="code-display">    <span class="code-keyword">static void</span> <span class="code-method">Main</span>()
+    {
+        <span class="code-method">PrintLogo</span>();
+        <span class="code-keyword">string</span> userName = <span class="code-method">GetName</span>();
+        Console.WriteLine(<span class="code-string">"Welcome, "</span> + userName + <span class="code-string">"!"</span>);
+    }</div>
+
+            <div class="important-note">
+                <strong>✅ הריצו והתנסו!</strong>
+            </div>
+        </div>
+
+        <!-- Slide 7: Method 2 Learning Points -->
+        <div class="slide content-slide">
+            <h2>מה למדנו מפעולה 2?</h2>
+            
+            <div class="learning-point">
+                <h4>🔹 פעולה שמחזירה ערך</h4>
+                <p><strong>() static string GetName</strong></p>
+                <p>• במקום <strong>void</strong> יש לנו <strong>string</strong> - זה אומר שהפעולה מחזירה מחרוזת</p>
+                <p>• בתוך הפעולה יש <strong>;return name</strong> - זה מחזיר את הערך למי שזימן את הפעולה</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>🔹 איך משתמשים בערך המוחזר</h4>
+                <p><strong>(); string name = GetName</strong></p>
+                <p><strong>• חייבים לקלוט את הערך המוחזר לתוך משתנה!</strong></p>
+                <p>• אם לא נעשה זאת, הערך לא יוכל לשמש אותנו</p>
+            </div>
+
+            <div class="important-note">
+                <strong>⚠️ טעות נפוצה:</strong>
+                <p>אם נכתוב רק <strong>;()GetName</strong> בלי לקלוט את הערך המוחזר לתוך משתנה, הערך שהמשתמש הזין יאבד!</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Method 3 Code - PrintGreeting -->
+        <div class="slide content-slide">
+            <h2>פעולה 3: PrintGreeting</h2>
+            
+            <h3>📋 הוסיפו את הפעולה הזו:</h3>
+            
+            <div class="code-display">    <span class="code-comment">// Method that receives a name and prints personal greeting</span>
+    <span class="code-keyword">static void</span> <span class="code-method">PrintGreeting</span>(<span class="code-keyword">string</span> name)
+    {
+        Console.WriteLine();
+        Console.WriteLine(<span class="code-string">"Hello "</span> + name + <span class="code-string">", welcome to DRIVE SAFE!"</span>);
+        Console.WriteLine(<span class="code-string">"We're excited to help you start your driving journey."</span>);
+        Console.WriteLine();
+    }</div>
+
+            <h3>📋 עדכנו את ה-Main:</h3>
+            
+            <div class="code-display">    <span class="code-keyword">static void</span> <span class="code-method">Main</span>()
+    {
+        <span class="code-method">PrintLogo</span>();
+        <span class="code-keyword">string</span> userName = <span class="code-method">GetName</span>();
+        <span class="code-method">PrintGreeting</span>(userName);
+    }</div>
+
+            <div class="important-note">
+                <strong>✅ הריצו וראו את ההבדל!</strong>
+            </div>
+        </div>
+
+        <!-- Slide 9: Method 3 Learning Points -->
+        <div class="slide content-slide">
+            <h2>מה למדנו מפעולה 3?</h2>
+            
+            <div class="learning-point">
+                <h4>🔹 פעולה שמקבלת פרמטר</h4>
+                <p><strong>static void PrintGreeting(string name)</strong></p>
+                <p>• בתוך הסוגריים יש <strong>string name</strong> - זה פרמטר</p>
+                <p>• הפרמטר הוא משתנה שהפעולה מקבלת כשקוראים לה</p>
+                <p>• הפרמטר זמין לשימוש בתוך כל הפעולה</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>🔹 איך מעבירים ערך לפעולה</h4>
+                <p><strong>;PrintGreeting(userName)</strong></p>
+                <p>• כותבים את שם המשתנה (או ערך ישיר) בתוך הסוגריים</p>
+                <p>• הערך מועבר לפעולה ומאוחסן בפרמטר <strong>name</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 10: Method 3 More Learning -->
+        <div class="slide content-slide">
+            <h2>עוד על פרמטרים</h2>
+            
+            <div class="important-note">
+                <strong>💡 שמות המשתנים לא חייבים להיות זהים!</strong>
+                <p>• ב-Main השם הוא <strong>userName</strong></p>
+                <p>• בפעולה PrintGreeting השם הוא <strong>name</strong></p>
+                <p>• זה בסדר גמור! כל פעולה יכולה לקרוא למשתנים שלה איך שהיא רוצה</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>🔹 למה זה שימושי?</h4>
+                <p>כל פעולה היא "עצמאית" - היא לא תלויה בשמות המשתנים במקומות אחרים בקוד.</p>
+                <p>זה מאפשר לנו לקרוא לפעולה עם ערכים שונים, או עם משתנים מסוגים שונים:</p>
+            </div>
+
+            <div class="code-display">
+<span class="code-method">PrintGreeting</span>(studentName);
+<span class="code-method">PrintGreeting</span>(playerName);
+<span class="code-method">PrintGreeting</span>(player1);
+<span class="code-method">PrintGreeting</span>(<span class="code-string">"David"</span>);</div>
+        </div>
+
+        <!-- Slide 11: Method 4 Code - GetAge -->
+        <div class="slide content-slide">
+            <h2>פעולה 4: GetAge</h2>
+            
+            <h3>📋 הוסיפו את הפעולה הזו:</h3>
+            
+            <div class="code-display">    <span class="code-comment">// Method that gets age from user and returns it</span>
+    <span class="code-keyword">static int</span> <span class="code-method">GetAge</span>()
+    {
+        Console.Write(<span class="code-string">"Please enter your age: "</span>);
+        <span class="code-keyword">int</span> age = <span class="code-keyword">int</span>.Parse(Console.ReadLine());
+        <span class="code-keyword">return</span> age;
+    }</div>
+
+            <h3>📋 עדכנו את ה-Main:</h3>
+            
+            <div class="code-display">    <span class="code-keyword">static void</span> <span class="code-method">Main</span>()
+    {
+        <span class="code-method">PrintLogo</span>();
+        <span class="code-keyword">string</span> userName = <span class="code-method">GetName</span>();
+        <span class="code-method">PrintGreeting</span>(userName);
+        <span class="code-keyword">int</span> userAge = <span class="code-method">GetAge</span>();
+    }</div>
+
+            <div class="important-note">
+                <strong>✅ הריצו וודאו שהכל עובד!</strong>
+            </div>
+        </div>
+
+        <!-- Slide 12: Method 4 Learning Points -->
+        <div class="slide content-slide">
+            <h2>מה למדנו מפעולה 4?</h2>
+            
+            <div class="learning-point">
+                <h4>🔹 פעולה שמחזירה int</h4>
+                <p><strong>()static int GetAge</strong></p>
+                <p>• הפעולה מחזירה מספר שלם (int)</p>
+                <p>• חייבים לקלוט אותו למשתנה מסוג int</p>
+            </div>
+
+        </div>
+
+        <!-- Slide 13: Method 5 Code - GetParentConsent -->
+        <div class="slide content-slide">
+            <h2>פעולה 5: GetParentConsent</h2>
+            
+            <h3>📋 הוסיפו את הפעולה הזו:</h3>
+            
+            <div class="code-display">    <span class="code-comment">// Method that asks if parents consent and returns true/false</span>
+    <span class="code-keyword">static bool</span> <span class="code-method">GetParentConsent</span>()
+    {
+        Console.Write(<span class="code-string">"Do you have your parents' consent? (yes/no): "</span>);
+        <span class="code-keyword">string</span> answer = Console.ReadLine().ToLower();
+        <span class="code-keyword">if</span> (answer == <span class="code-string">"yes"</span>)
+            <span class="code-keyword">return true</span>;
+        <span class="code-keyword">else</span>
+            <span class="code-keyword">return false</span>;
+    }</div>
+
+            <h3>📋 עדכנו את ה-Main:</h3>
+            
+            <div class="code-display">    <span class="code-keyword">static void</span> <span class="code-method">Main</span>()
+    {
+        <span class="code-method">PrintLogo</span>();
+        <span class="code-keyword">string</span> userName = <span class="code-method">GetName</span>();
+        <span class="code-method">PrintGreeting</span>(userName);
+        <span class="code-keyword">int</span> userAge = <span class="code-method">GetAge</span>();
+        <span class="code-keyword">bool</span> parentConsent = <span class="code-method">GetParentConsent</span>();
+    }</div>
+        </div>
+
+        <!-- Slide 14: Method 5 Learning Points -->
+        <div class="slide content-slide">
+            <h2>מה למדנו מפעולה 5?</h2>
+            
+            <div class="learning-point">
+                <h4>🔹 פעולה שמחזירה bool</h4>
+                <p><strong>()static bool GetParentConsent</strong></p>
+                <p>• הפעולה מחזירה ערך בוליאני (true או false)</p>
+                <p>• מאוד שימושי לבדיקות ותנאים</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>🔹 כמה סוגי ערך מוחזר ראינו עד עכשיו?</h4>
+                <p>• <strong>void</strong> - אין ערך מוחזר</p>
+                <p>• <strong>string</strong> - הפעולה מחזירה מחרוזת</p>
+                <p>• <strong>int</strong> - הפעולה מחזירה מספר שלם</p>
+                <p>• <strong>bool</strong> - הפעולה מחזירה ערך בוליאני (אמת/שקר)</p>
+            </div>
+
+            <div class="important-note">
+                <strong>💡 כלל חשוב:</strong>
+                <p><strong>סוג ההחזרה בהגדרת הפעולה חייב להתאים לסוג המשתנה שקולט את הערך!</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 15: Method 6 Code - CanStartLearning -->
+        <div class="slide content-slide">
+            <h2>פעולה 6: CanStartLearning</h2>
+            
+            <h3>📋 הוסיפו את הפעולה הזו:</h3>
+            
+            <div class="code-display">    <span class="code-comment">// Method that receives age and consent, returns if can start learning</span>
+    <span class="code-keyword">static bool</span> <span class="code-method">CanStartLearning</span>(<span class="code-keyword">int</span> age, <span class="code-keyword">bool</span> hasConsent)
+    {
+        <span class="code-keyword">return</span> age >= 17 && hasConsent;
+    }</div>
+
+            <h3>📋 עדכנו את ה-Main:</h3>
+            
+            <div class="code-display">    <span class="code-keyword">static void</span> <span class="code-method">Main</span>()
+    {
+        <span class="code-method">PrintLogo</span>();
+        <span class="code-keyword">string</span> userName = <span class="code-method">GetName</span>();
+        <span class="code-method">PrintGreeting</span>(userName);
+        <span class="code-keyword">int</span> userAge = <span class="code-method">GetAge</span>();
+        <span class="code-keyword">bool</span> parentConsent = <span class="code-method">GetParentConsent</span>();
+        <span class="code-keyword">bool</span> canLearn = <span class="code-method">CanStartLearning</span>(userAge, parentConsent);
+    }</div>
+        </div>
+
+        <!-- Slide 16: Method 6 Learning Points - Part 1 -->
+        <div class="slide content-slide">
+            <h2>מה למדנו מפעולה 6?</h2>
+            
+            <div class="learning-point">
+                <h4>🔹 פעולה עם יותר מפרמטר אחד!</h4>
+                <p><strong>static bool CanStartLearning(int age, bool hasConsent)</strong></p>
+                <p>• הפעולה מקבלת <strong>שני</strong> פרמטרים</p>
+                <p>• מפרידים ביניהם עם פסיק: <strong>,</strong></p>
+                <p>• לכל פרמטר יש טיפוס ושם משלו</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>🔹 איך מעבירים כמה ערכים</h4>
+                <p><strong>CanStartLearning(userAge, parentConsent)</strong></p>
+                <p>• כותבים את הערכים בסדר הנכון</p>
+                <p>• מפרידים ביניהם עם פסיק</p>
+                <p>• הסדר חשוב! הערך הראשון הולך לפרמטר הראשון, והשני לשני</p>
+            </div>
+        </div>
+
+        <!-- Slide 17: Method 6 Learning Points - Part 2 -->
+        <div class="slide content-slide">
+            <h2>מה עוד למדנו מפעולה 6? </h2>
+            
+            <div class="learning-point">
+                <h4>🔹 הפעולה הזו גם מקבלת פרמטרים וגם מחזירה ערך!</h4>
+                <p>זוהי הצורה המלאה ביותר של פעולה:</p>
+                <p>• מקבלת מידע (דרך הפרמטרים)</p>
+                <p>• עושה חישוב או החלטה</p>
+                <p>• מחזירה תוצאה</p>
+            </div>
+
+            <div class="important-note">
+                <strong>💡 שימו לב לשמות!</strong>
+                <p>• ב-Main: <strong>userAge</strong> ו-<strong>parentConsent</strong></p>
+                <p>• בפעולה: <strong>age</strong> ו-<strong>hasConsent</strong></p>
+                <p>• כמו בפעם הקודמת - השמות לא חייבים להיות זהים!</p>
+            </div>
+        </div>
+
+        <!-- Slide 18: Method 7 Code - PrintSummary -->
+        <div class="slide content-slide">
+            <h2>פעולה 7: PrintSummary</h2>
+            
+            <h3>📋 הוסיפו את הפעולה הזו:</h3>
+            
+            <div class="code-display">    <span class="code-comment">// Method that prints summary with personalized message</span>
+    <span class="code-keyword">static void</span> <span class="code-method">PrintSummary</span>(<span class="code-keyword">string</span> name, <span class="code-keyword">int</span> age, 
+                              <span class="code-keyword">bool</span> hasConsent, <span class="code-keyword">bool</span> canStart)
+    {
+        <span class="code-keyword">if</span> (canStart)
+        {
+            Console.WriteLine(<span class="code-string">"Great news, "</span> + name + <span class="code-string">"!"</span>);
+            Console.WriteLine(<span class="code-string">"You can start driving lessons!"</span>);
+        }
+        <span class="code-keyword">else</span>
+        {
+            Console.WriteLine(<span class="code-string">"Sorry, "</span> + name + <span class="code-string">", you cannot start yet."</span>);
+            <span class="code-keyword">if</span> (age < 17)
+                Console.WriteLine(<span class="code-string">"Reason: You must be at least 17 years old."</span>);
+            <span class="code-keyword">if</span> (!hasConsent)
+                Console.WriteLine(<span class="code-string">"Reason: You need your parents' consent."</span>);
+        }
+        Console.WriteLine(<span class="code-string">"============================"</span>);
+    }</div>
+        </div>
+
+        <!-- Slide 19: Method 7 - Complete Main -->
+        <div class="slide content-slide">
+            <h2>פעולה 7: Main המלא</h2>
+            
+            <h3>📋 עדכנו את ה-Main הסופי:</h3>
+            
+            <div class="code-display">    <span class="code-keyword">static void</span> <span class="code-method">Main</span>()
+    {
+        <span class="code-method">PrintLogo</span>();
+        
+        <span class="code-keyword">string</span> userName = <span class="code-method">GetName</span>();
+        <span class="code-method">PrintGreeting</span>(userName);
+        
+        <span class="code-keyword">int</span> userAge = <span class="code-method">GetAge</span>();
+        <span class="code-keyword">bool</span> parentConcent = <span class="code-method">GetParentConsent</span>();
+        
+        <span class="code-keyword">bool</span> canLearn = <span class="code-method">CanStartLearning</span>(userAge, parentConcent);
+        
+        <span class="code-method">PrintSummary</span>(userName, userAge, parentConsent, canLearn);
+    }</div>
+
+            <div class="important-note">
+                <strong>✅ הריצו את התוכנית המלאה!</strong>
+                <p>ראו איך כל הפעולות עובדות ביחד ליצירת תוכנית מסודרת וברורה!</p>
+            </div>
+        </div>
+
+        <!-- Slide 20: Method 7 Learning Points -->
+        <div class="slide content-slide">
+            <h2>מה למדנו מפעולה 7?</h2>
+            
+            <div class="learning-point">
+                <h4>🔹 ה-Main נקי וקריא!</h4>
+                <p>שימו לב איך ה-Main עכשיו קצר וברור:</p>
+                <p>• כל שורה אומרת בדיוק מה היא עושה</p>
+                <p>• קל להבין את הסדר והלוגיקה</p>
+                <p>• כל הפרטים "מוסתרים" בתוך הפעולות</p>
+            </div>
+        </div>
+
+        <!-- Slide 21: Summary of All Method Types -->
+        <div class="slide content-slide">
+            <h2>סיכום: 4 סוגי פעולות שלמדנו</h2>
+            
+            <div class="learning-point">
+                <h4>1️⃣ ללא פרמטרים, ללא ערך מוחזר</h4>
+                <p><strong>()void PrintLogo</strong></p>
+                <p>מדפיסה משהו, לא מחזירה כלום</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>2️⃣ ללא פרמטרים, עם ערך מוחזר</h4>
+                <p><strong>()string GetName()</strong>, <strong>int GetAge()</strong>, <strong>bool GetParentConsent</strong></p>
+                <p>שואלת שאלה, מחזירה תשובה</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>3️⃣ עם פרמטרים, ללא ערך מוחזר</h4>
+                <p><strong>void PrintGreeting(string name)</strong></p>
+                <p>מקבלת מידע, עושה משהו איתו, לא מחזירה כלום</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>4️⃣ עם פרמטרים, עם ערך מוחזר</h4>
+                <p><strong>bool CanStartLearning(int age, bool hasConsent)</strong></p>
+                <p>מקבלת מידע, מעבדת אותו, מחזירה תוצאה</p>
+            </div>
+        </div>
+
+        <!-- Slide 22: Key Reminders -->
+        <div class="slide content-slide">
+            <h2>דברים חשובים לזכור 💡</h2>
+            
+            <div class="important-note">
+                <strong>1. סוג ההחזרה חייב להתאים!</strong>
+                <p>אם הפעולה מוגדרת עם <strong>int</strong>, חייבים לקלוט למשתנה מסוג <strong>int</strong></p>
+            </div>
+
+            <div class="important-note">
+                <strong>2. ערך מוחזר חייב להישמר במשתנה!</strong>
+                <p>אם לא נשמור את הערך המוחזר, הוא יאבד</p>
+            </div>
+
+            <div class="important-note">
+                <strong>3. שמות הפרמטרים לא חייבים להיות זהים</strong>
+                <p>כל פעולה יכולה לקרוא למשתנים שלה איך שהיא רוצה</p>
+            </div>
+
+            <div class="important-note">
+                <strong>4. סדר הפרמטרים חשוב!</strong>
+                <p>כשקוראים לפעולה, הערכים עוברים לפי הסדר שמופיע בהגדרה</p>
+            </div>
+        </div>
+
+        <!-- Slide 23: Back to Hanukkah - Challenge 1 -->
+        <div class="slide content-slide">
+            <h2>חזרה לפרויקט חנוכה 🕎</h2>
+            
+            <h3>עכשיו שאנחנו יודעים פעולות...</h3>
+            
+            <div class="important-note">
+                <strong>🎯 אתגר 1: Switch Case כפעולה</strong>
+                <p>קחו את ה-switch case שקובע איזה תאריך ושעה להדליק נרות והפכו אותו לפעולה!</p>
+                <br>
+                <p><strong>רמז:</strong></p>
+                <p>• הפעולה תקבל מספר נר (int)</p>
+                <p>• הפעולה יכולה להדפיס ישירות, או להחזיר ערך מטיפוס String עם מחרוזת של מועד הדלקה</p>
+                <p>• קראו לפעולה שם מתאים כמו GetCandleLightingTime</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>למה זה משפר את הקוד?</h4>
+                <p>• ה-Main יהיה יותר קצר וקריא</p>
+                <p>• אם נצטרך לשנות את השעות, נעדכן רק במקום אחד</p>
+                <p>• הקוד יותר מסודר ומקצועי</p>
+            </div>
+        </div>
+
+        <!-- Slide 24: Back to Hanukkah - Challenge 2 -->
+        <div class="slide content-slide">
+            <h2>אתגר 2: ערב אחד כפעולה</h2>
+            
+            <div class="important-note">
+                <strong>🎯 אתגר 2: כל הלוגיקה של ערב חג אחד</strong>
+                <p>קחו את כל הקוד שמטפל בערב חג אחד (קריאה לפעולת ה-switch + שתי הלולאות) והפכו אותו לפעולה!</p>
+                <br>
+                <p><strong>רמז:</strong></p>
+                <p>• הפעולה תקבל מספר נר (int)</p>
+                <p>• היא תקרא לפעולה של ה-switch</p>
+                <p>• היא תריץ את שתי הלולאות</p>
+                <p>• קראו לה שם כמו DoOneNight</p>
+            </div>
+
+            <div class="learning-point">
+                <h4>💡 מה נקבל?</h4>
+                <p>מה יהיה ב- Main?</p>
+                <div class="code-display"><span class="code-keyword"> ??? </div>
+                <p><strong>נקי, פשוט, וברור!</strong></p>
+            </div>
+        </div>
+
+        <!-- Slide 25: Final Slide -->
+        <div class="slide content-slide">
+            <h2>סיכום השיעור 🎓</h2>
+            
+            <div class="learning-point">
+                <h4>🌟 מה למדנו היום</h4>
+                <p>• מהן פעולות (Methods) ולמה הן שימושיות</p>
+                <p>• 4 סוגים שונים של פעולות</p>
+                <p>• מתי להשתמש ב-void ומתי להחזיר ערך</p>
+                <p>• איך לעבוד עם פרמטרים</p>
+                <p>• איך פעולות הופכות את הקוד ליותר נקי וקריא</p>
+            </div>
+
+            <div class="important-note">
+                <strong>🏆 המשימה הביתה</strong>
+                <p>סיימו את שני האתגרים בפרויקט חנוכה:</p>
+                <p>1. Switch case כפעולה</p>
+                <p>2. ערב אחד כפעולה</p>
+                <br>
+                <p>בהצלחה! 🚀</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="nav-buttons">
+        <button class="nav-btn" onclick="prevSlide()" id="prev-btn" disabled>הקודם →</button>
+        <button class="nav-btn" onclick="nextSlide()" id="next-btn">← הבא</button>
+    </div>
+
+    <div class="slide-number">
+        <span id="total-slides">24</span> / <span id="current-slide">1</span>
+    </div>
+
+    <div class="copyright">© חגית ידוב 2025</div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = n;
+            slides[currentSlide].classList.add('active');
+
+            const contentSlideNumber = currentSlide === 0 ? 0 : currentSlide;
+            
+            if (currentSlide > 0) {
+                document.getElementById('current-slide').textContent = contentSlideNumber;
+            }
+
+            document.getElementById('prev-btn').disabled = currentSlide === 0;
+            document.getElementById('next-btn').disabled = currentSlide === totalSlides - 1;
+
+            const isTitle = slides[currentSlide].classList.contains('title-slide');
+            document.querySelector('.slide-number').style.display = isTitle ? 'none' : 'block';
+            document.querySelector('.copyright').style.display = isTitle ? 'none' : 'block';
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') {
+                prevSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === ' ') {
+                nextSlide();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const isTitle = slides[currentSlide].classList.contains('title-slide');
+            document.querySelector('.slide-number').style.display = isTitle ? 'none' : 'block';
+            document.querySelector('.copyright').style.display = isTitle ? 'none' : 'block';
+            
+            document.getElementById('total-slides').textContent = totalSlides - 1;
+        });
+    </script>
+</body>
+</html>
